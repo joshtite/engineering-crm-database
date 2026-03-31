@@ -103,21 +103,44 @@ async function fetchCrmData() {
     total_project_budget_display: formatCurrency(budgetByClient[c.client_id] ?? 0),
   }))
 
+  const totalBudget = projectRows.reduce((s, p) => s + (Number(p.budget) || 0), 0)
+  const inProgressProjects = projectRows.filter(
+    (p) => (p.status ?? '').toLowerCase() === 'in_progress',
+  ).length
+  const openTasks = taskRows.filter(
+    (t) => (t.status ?? '').toLowerCase() !== 'completed',
+  ).length
+
   const projects = projectRows.map((p) => ({
     ...p,
     budget_display: formatCurrency(p.budget),
+    client_name: clientById[p.client_id] ?? '—',
   }))
 
   const tasks = taskRows.map((t) => ({
     ...t,
     due_date_display: formatDate(t.due_date),
+    project_name: projectById[t.project_id] ?? '—',
   }))
+
+  const summary = {
+    projectCount: projectRows.length,
+    clientCount: clientRows.length,
+    taskCount: taskRows.length,
+    inProgressProjects,
+    openTasks,
+    totalBudgetDisplay: formatCurrency(totalBudget),
+    avgBudgetDisplay: formatCurrency(
+      projectRows.length ? totalBudget / projectRows.length : null,
+    ),
+  }
 
   return {
     error: null,
     projects,
     clientsWithBudget: clientsBudget,
     tasks,
+    summary,
   }
 }
 
@@ -140,4 +163,13 @@ export function useCrmData() {
   }, [])
 
   useEffect(() => {
-    co
+    const task = Promise.resolve().then(() => runFetch())
+    return () => void task
+  }, [runFetch])
+
+  const reload = useCallback(() => {
+    runFetch()
+  }, [runFetch])
+
+  return { projects, clientsWithBudget, tasks, loading, error, reload }
+}
