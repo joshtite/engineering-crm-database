@@ -148,6 +148,7 @@ export function useCrmData() {
   const [projects, setProjects] = useState([])
   const [clientsWithBudget, setClientsWithBudget] = useState([])
   const [tasks, setTasks] = useState([])
+  const [summary, setSummary] = useState(() => emptySummary())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -160,6 +161,7 @@ export function useCrmData() {
     setProjects(result.projects)
     setClientsWithBudget(result.clientsWithBudget)
     setTasks(result.tasks)
+    setSummary(result.summary ?? emptySummary())
   }, [])
 
   useEffect(() => {
@@ -171,5 +173,5 @@ export function useCrmData() {
     runFetch()
   }, [runFetch])
 
-  return { projects, clientsWithBudget, tasks, loading, error, reload }
+  return { projects, clientsWithBudget, tasks, summary, loading, error, reload }
 }

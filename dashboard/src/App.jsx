@@ -2,13 +2,18 @@ import './App.css'
 import { useCrmData } from './hooks/useCrmData'
 
 function App() {
-  const { projects, clientsWithBudget, tasks, loading, error, reload } =
+  const { projects, clientsWithBudget, tasks, summary, loading, error, reload } =
     useCrmData()
 
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>Engineering CRM</h1>
+        <div>
+          <h1>FPP Consulting — CRM overview</h1>
+          <p className="tagline">
+            Live data: clients, projects, and tasks (engineering consultancy demo)
+          </p>
+        </div>
         <button type="button" className="reload" onClick={reload} disabled={loading}>
           {loading ? 'Loading…' : 'Refresh'}
         </button>
@@ -20,6 +25,37 @@ function App() {
         </div>
       )}
 
+      <section className="snapshot" aria-label="Summary">
+        <div className="stat">
+          <span className="stat-value">{summary.projectCount}</span>
+          <span className="stat-label">Projects</span>
+        </div>
+        <div className="stat">
+          <span className="stat-value">{summary.clientCount}</span>
+          <span className="stat-label">Clients</span>
+        </div>
+        <div className="stat">
+          <span className="stat-value">{summary.taskCount}</span>
+          <span className="stat-label">Tasks</span>
+        </div>
+        <div className="stat">
+          <span className="stat-value">{summary.inProgressProjects}</span>
+          <span className="stat-label">In progress</span>
+        </div>
+        <div className="stat">
+          <span className="stat-value">{summary.openTasks}</span>
+          <span className="stat-label">Open tasks</span>
+        </div>
+        <div className="stat wide">
+          <span className="stat-value">{summary.totalBudgetDisplay}</span>
+          <span className="stat-label">Pipeline (sum of project budgets)</span>
+        </div>
+        <div className="stat wide">
+          <span className="stat-value">{summary.avgBudgetDisplay}</span>
+          <span className="stat-label">Avg project budget</span>
+        </div>
+      </section>
+
       <section className="panel">
         <h2>Projects</h2>
         <div className="table-wrap">
@@ -27,6 +63,7 @@ function App() {
             <thead>
               <tr>
                 <th>Project</th>
+                <th>Client</th>
                 <th>Status</th>
                 <th>Budget</th>
               </tr>
@@ -34,7 +71,7 @@ function App() {
             <tbody>
               {projects.length === 0 && !loading ? (
                 <tr>
-                  <td colSpan={3} className="empty">
+                  <td colSpan={4} className="empty">
                     No projects
                   </td>
                 </tr>
@@ -42,6 +79,7 @@ function App() {
                 projects.map((p) => (
                   <tr key={p.project_id}>
                     <td>{p.project_name}</td>
+                    <td>{p.client_name}</td>
                     <td>{p.status ?? '—'}</td>
                     <td>{p.budget_display}</td>
                   </tr>
@@ -89,6 +127,7 @@ function App() {
             <thead>
               <tr>
                 <th>Title</th>
+                <th>Project</th>
                 <th>Status</th>
                 <th>Due date</th>
               </tr>
@@ -96,7 +135,7 @@ function App() {
             <tbody>
               {tasks.length === 0 && !loading ? (
                 <tr>
-                  <td colSpan={3} className="empty">
+                  <td colSpan={4} className="empty">
                     No tasks
                   </td>
                 </tr>
@@ -104,6 +143,7 @@ function App() {
                 tasks.map((t) => (
                   <tr key={t.task_id}>
                     <td>{t.title}</td>
+                    <td>{t.project_name}</td>
                     <td>{t.status ?? '—'}</td>
                     <td>{t.due_date_display}</td>
                   </tr>
@@ -113,6 +153,13 @@ function App() {
           </table>
         </div>
       </section>
+
+      <footer className="footer">
+        <p>
+          Backend: PostgreSQL on Supabase · Schema includes contacts, internal users, and
+          project updates (not shown here yet).
+        </p>
+      </footer>
     </div>
   )
 }
